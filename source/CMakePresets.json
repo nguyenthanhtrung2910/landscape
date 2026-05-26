@@ -1,0 +1,47 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "landscape-debug",
+            "displayName": "landscape-debug",
+            "description": "Debug configuration preset",
+            "binaryDir": "${sourceDir}/../debug",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "landscape-release",
+            "displayName": "landscape-release",
+            "description": "Release configuration preset",
+            "binaryDir": "${sourceDir}/../release",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "landscape-debug",
+            "description": "Debug build preset",
+            "displayName": "landscape-debug",
+            "targets": [
+                "landscape", "client"
+            ],
+            "configurePreset": "landscape-debug"
+        },
+        {
+            "name": "landscape-release",
+            "description": "Release build preset",
+            "displayName": "landscape-release",
+            "targets": [
+                "landscape", "client"
+            ],
+            "configurePreset": "landscape-release"
+        }
+    ]
+}

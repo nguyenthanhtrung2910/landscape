@@ -1,0 +1,30 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/source",
+    "files.exclude": {
+        "**/.git": true,
+        ".thumbnails": true,
+        "bin": true,
+        "include": true,
+        "release": true,
+        "debug": true,
+        "utils": true,
+        "data/.runtimes": true,
+        "data/*.cache": true,
+        "data/*.gpu_cache": true,
+        "data/*.ung": true,
+    },
+    "files.associations": {
+        "*.project": "json",
+        "*.meta": "xml",
+        "*.world": "xml",
+        "*.umount": "json",
+        "*.node": "xml",
+        "*.mat": "xml",
+        "*.prop": "xml",
+        "*.boot": "xml",
+        "*.config": "xml",
+        "*.controls": "xml",
+        "*.global": "xml",
+        "*.user": "xml",
+    }
+}

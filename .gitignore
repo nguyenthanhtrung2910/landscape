@@ -1,0 +1,12 @@
+.thumbnails
+ai_docs
+AGENTS.md
+CLAUDE.md
+copilot-instructions.md
+bin
+include
+release
+debug
+utils
+data
+*.project
