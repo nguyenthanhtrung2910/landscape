@@ -5,8 +5,6 @@
         ".thumbnails": true,
         "bin": true,
         "include": true,
-        "release": true,
-        "debug": true,
         "utils": true,
         "data/.runtimes": true,
         "data/*.cache": true,

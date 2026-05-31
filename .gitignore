@@ -1,4 +1,6 @@
 .thumbnails
+.agents
+.codex
 ai_docs
 AGENTS.md
 CLAUDE.md

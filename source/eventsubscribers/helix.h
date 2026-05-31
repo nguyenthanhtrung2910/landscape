@@ -4,8 +4,8 @@
 #include <boost/asio.hpp>
 #include <queue>
 
+#include "AppWorldLogic.h"
 #include "eventsubscribers/eventsubscriber.h"
-#include <AppWorldLogic.h>
 
 class Helix : public EventSubscriber
 {

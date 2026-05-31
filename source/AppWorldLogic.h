@@ -7,7 +7,7 @@
 #include <UnigineLogic.h>
 #include <UnigineStreams.h>
 
-#include <eventsubscribers/eventsubscriber.h>
+#include "eventsubscribers/eventsubscriber.h"
 
 class AppWorldLogic : public Unigine::WorldLogic
 {

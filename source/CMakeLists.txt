@@ -3,11 +3,17 @@
 ##==============================================================================
 cmake_minimum_required(VERSION 4.0)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/UnigineCMakeVariables.cmake)
+project(landscape LANGUAGES C CXX CUDA)
 
-project(landscape LANGUAGES CXX)
+##==============================================================================
+## Global cached default variables.
+##==============================================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+set(CMAKE_CUDA_EXTENSIONS FALSE)
 
 ##==============================================================================
 ## Dependencies.
@@ -20,14 +26,20 @@ set(UNIGINE_LIB_DIR ${UNIGINE_SDK_PATH}lib)
 set(UNIGINE_INCLUDE_DIR ${UNIGINE_SDK_PATH}include)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 find_package(Engine REQUIRED MODULE QUIET)
-# OpenCV
-find_package(OpenCV REQUIRED COMPONENTS core videoio QUIET)
 # JsonCpp
-find_package(jsoncpp REQUIRED)
-
+# find_package(jsoncpp REQUIRED)
+# Cuda
+find_package(CUDAToolkit REQUIRED)
+# FFmpeg
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET
+    libavcodec
+    libavformat
+    libavutil
+)
 
 ##==============================================================================
-## Target.
+## Target linking.
 ##==============================================================================
 set(target "landscape")
 if(WIN32)
@@ -41,31 +53,36 @@ add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/Drone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PathVisualizer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PropellerAnimation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Tank/Tank.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Tank/TankCamera.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/VideoMaker.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cudautils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cudatexture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rgba_to_nv12.cu
 )
 target_include_directories(${target} PRIVATE
+    ${CUDAToolkit_INCLUDE_DIRS}
     ${UNIGINE_INCLUDE_DIR}
     ${CMAKE_CURRENT_LIST_DIR}
 )
 target_link_libraries(${target} PRIVATE
     Unigine::Engine
-    $<$<BOOL:${OpenCV_FOUND}>:${OpenCV_LIBS}>
-    JsonCpp::JsonCpp
+    CUDA::cudart
+    # JsonCpp::JsonCpp
+    PkgConfig::FFMPEG
 )
 set_property(TARGET ${target} APPEND PROPERTY
     BUILD_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/../bin
 )
-set_property(TARGET ${target} PROPERTY
-    DEBUG_POSTFIX "d"
-)
 set(binary_name ${target})
 string(APPEND binary_name "_x64")
-set_property(TARGET ${target} PROPERTY
+set_target_properties(${target} PROPERTIES
+    DEBUG_POSTFIX "d"
     OUTPUT_NAME ${binary_name}
+    CUDA_SEPARABLE_COMPILATION TRUE
+    CUDA_ARCHITECTURES 86
 )
 
 ##==============================================================================
