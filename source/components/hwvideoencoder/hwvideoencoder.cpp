@@ -64,7 +64,7 @@ void HWVideoEncoder::drawUI()
     m_mainWidget = WidgetSprite::create(gui);
     // displayed texture with alpha channel, disable widgets blending
     m_mainWidget->setBlendFunc(Gui::BLEND_NONE, Gui::BLEND_NONE);
-    gui->addChild(m_mainWidget, Gui::ALIGN_OVERLAP);
+    gui->addChild(m_mainWidget);
 
     // recording buttons
     WidgetGroupBoxPtr groupBox{WidgetGroupBox::create("Video Recording")};
@@ -144,7 +144,7 @@ bool HWVideoEncoder::openHardwareFrames(int width, int height)
         Log::error("HWVideoEncoder: NV12 requires even frame size, got %dx%d\n", width, height);
         return false;
     }
-    // Allocate device context 
+    // Allocate device context
     AVDictionary *deviceOptions{};
     av_dict_set(&deviceOptions, "current_ctx", "1", 0);
     int result = av_hwdevice_ctx_create(
@@ -410,7 +410,7 @@ void HWVideoEncoder::encodeFrame(int width, int height)
         return;
     }
     // TODO: For now, the frame has display resolution so this operation can be fast enough.
-    // If the resolution will be higher, consider move this logic to separate thread and 
+    // If the resolution will be higher, consider move this logic to separate thread and
     // use frame queue to avoid blocking main thread on encoding.
     if (!sendFrame(frame))
         stopRecording();

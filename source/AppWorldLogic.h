@@ -2,7 +2,6 @@
 #define __APP_WORLD_LOGIC_H__
 
 #include <queue>
-#include <boost/asio.hpp>
 
 #include <UnigineLogic.h>
 #include <UnigineStreams.h>
@@ -21,6 +20,7 @@ public:
 	int postUpdate() override;
 	int updatePhysics() override;
 	int shutdown() override;
+	void releaseHardwareResources();
 
 	void enqueueEvent(const FlightEvent &event);
 	FlightEvent popEvent();

@@ -1,5 +1,9 @@
 #include "AppWorldLogic.h"
 
+#include <UnigineComponentSystem.h>
+
+#include "components/hwvideoencoder/hwvideoencoder.h"
+
 // World logic, it takes effect only when the world is loaded.
 // These methods are called right after corresponding world script's (UnigineScript) methods.
 
@@ -49,6 +53,13 @@ int AppWorldLogic::shutdown()
 {
 	// Write here code to be called on world shutdown: delete resources that were created during world script execution to avoid memory leaks.
 	return 1;
+}
+
+void AppWorldLogic::releaseHardwareResources()
+{
+	HWVideoEncoder *encoder{Unigine::ComponentSystem::get()->getComponentInWorld<HWVideoEncoder>()};
+	if (encoder)
+		encoder->shutdown();
 }
 
 void AppWorldLogic::enqueueEvent(const FlightEvent &event)

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <utility>
+#include <iostream>
 
 #include <UnigineMathLib.h>
 

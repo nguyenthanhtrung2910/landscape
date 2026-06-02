@@ -34,16 +34,16 @@ public:
     COMPONENT_DEFINE(HWVideoEncoder, Unigine::ComponentBase);
     PROP_PARAM(Int, fps, 60);
     COMPONENT_INIT(init);
-    COMPONENT_SHUTDOWN(shutdown);
-    COMPONENT_UPDATE(update);
+    // Update renders to custom texture so it should be invoked last in the update order
+    COMPONENT_UPDATE(update, 10);
 
 public:
     void startRecording();
     void stopRecording();
+    void shutdown();
 
 private:
     void init();
-    void shutdown();
     void update();
 
 private:

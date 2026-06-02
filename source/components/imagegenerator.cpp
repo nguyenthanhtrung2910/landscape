@@ -1,4 +1,4 @@
-#include "ImagesGenerator.h"
+#include "imagegenerator.h"
 
 #include <UnigineGame.h>
 #include <UnigineInput.h>
@@ -9,13 +9,13 @@
 using namespace Unigine;
 using namespace Math;
 
-REGISTER_COMPONENT(ImagesGenerator)
+REGISTER_COMPONENT(ImageGenerator)
 
-void ImagesGenerator::init()
+void ImageGenerator::init()
 {
     m_viewport = Viewport::create();
     m_viewport->setMode(Render::getViewportMode());
-    m_viewport->getEventEndAuxiliaryDecals().connect(this, &ImagesGenerator::captureAuxiliary);
+    m_viewport->getEventEndAuxiliaryDecals().connect(this, &ImageGenerator::captureAuxiliary);
     m_colorTexture = Texture::create();
     m_targetPlayer = checked_ptr_cast<Player>(target_player.get());
     m_framesUntilCapture = capture_frequency.get();
@@ -27,19 +27,19 @@ void ImagesGenerator::init()
     groupBox->setPosition(20, 50);
     groupBox->addChild(vbox, Gui::ALIGN_CENTER);
     WidgetButtonPtr buttonCapture{WidgetButton::create("Capture")};
-    buttonCapture->getEventClicked().connect(this, &ImagesGenerator::startCapture);
+    buttonCapture->getEventClicked().connect(this, &ImageGenerator::startCapture);
     WidgetButtonPtr buttonStop{WidgetButton::create("Stop")};
-    buttonStop->getEventClicked().connect(this, &ImagesGenerator::stopCapture);
+    buttonStop->getEventClicked().connect(this, &ImageGenerator::stopCapture);
     vbox->addChild(buttonCapture);
     vbox->addChild(buttonStop);
     gui->addChild(groupBox, Gui::ALIGN_OVERLAP);
 }
 
-void ImagesGenerator::shutdown()
+void ImageGenerator::shutdown()
 {
 }
 
-void ImagesGenerator::update()
+void ImageGenerator::update()
 {
     // Manual capture mode with warmup
     if (m_state == STATE_WARMUP)
@@ -103,14 +103,14 @@ void ImagesGenerator::update()
     }
 }
 
-void ImagesGenerator::captureAuxiliary()
+void ImageGenerator::captureAuxiliary()
 {
     if (m_framesUntilCapture <= 1)
     {
         TexturePtr auxiliaryTexture = Renderer::getTextureAuxiliary();
         if (!auxiliaryTexture)
         {
-            Log::warning("ImagesGenerator: auxiliary texture is unavailable.\n");
+            Log::warning("ImageGenerator: auxiliary texture is unavailable.\n");
             return;
         }
         saveTextureAsync(
@@ -120,7 +120,7 @@ void ImagesGenerator::captureAuxiliary()
     }
 }
 
-void ImagesGenerator::saveTextureAsync(const TexturePtr &texture, const char *pattern, int capture_index)
+void ImageGenerator::saveTextureAsync(const TexturePtr &texture, const char *pattern, int capture_index)
 {
     if (!texture)
         return;
@@ -135,12 +135,12 @@ void ImagesGenerator::saveTextureAsync(const TexturePtr &texture, const char *pa
 
 				String full_name = String::format(pattern, capture_index);
 				image->save(full_name.get());
-				Log::message("ImagesGenerator saved \"%s\"\n", full_name.get()); }),
+				Log::message("ImageGenerator saved \"%s\"\n", full_name.get()); }),
         nullptr,
         texture);
 }
 
-void ImagesGenerator::startCapture()
+void ImageGenerator::startCapture()
 {
     if (m_state != STATE_IDLE)
         return;
@@ -153,7 +153,7 @@ void ImagesGenerator::startCapture()
     m_state = STATE_WARMUP;
 }
 
-void ImagesGenerator::stopCapture()
+void ImageGenerator::stopCapture()
 {
     if (m_state == STATE_IDLE)
         return;

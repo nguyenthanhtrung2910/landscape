@@ -2,7 +2,7 @@
 ## General.
 ##==============================================================================
 cmake_minimum_required(VERSION 4.0)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/UnigineCMakeVariables.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UnigineCMakeVariables.cmake)
 project(landscape LANGUAGES C CXX CUDA)
 
 ##==============================================================================
@@ -27,7 +27,7 @@ set(UNIGINE_INCLUDE_DIR ${UNIGINE_SDK_PATH}include)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 find_package(Engine REQUIRED MODULE QUIET)
 # JsonCpp
-# find_package(jsoncpp REQUIRED)
+find_package(jsoncpp REQUIRED)
 # Cuda
 find_package(CUDAToolkit REQUIRED)
 # FFmpeg
@@ -50,27 +50,31 @@ add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppSystemLogic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppWorldLogic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/Drone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PathVisualizer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PropellerAnimation.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/Tank/Tank.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/Tank/TankCamera.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/cudautils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/cudatexture.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rgba_to_nv12.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/Input/GamepadInput.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/Input/InputManager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/Input/InputUtils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/Input/KeyboardInput.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/cameramanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/hwvideoencoder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/cudautils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/cudatexture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/rgba_to_nv12.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
 )
 target_include_directories(${target} PRIVATE
     ${CUDAToolkit_INCLUDE_DIRS}
     ${UNIGINE_INCLUDE_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(${target} PRIVATE
     Unigine::Engine
     CUDA::cudart
-    # JsonCpp::JsonCpp
+    JsonCpp::JsonCpp
     PkgConfig::FFMPEG
 )
 set_property(TARGET ${target} APPEND PROPERTY

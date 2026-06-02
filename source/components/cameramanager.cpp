@@ -1,46 +1,50 @@
-#include "UnigineConsole.h"
-#include "UnigineEngine.h"
-#include "UnigineInput.h"
-#include "UnigineGame.h"
-#include "UniginePlayers.h"
-#include "TankCamera.h"
+#include "cameramanager.h"
 
-REGISTER_COMPONENT(TankCamera);
+#include <UnigineConsole.h>
+#include <UnigineInput.h>
+#include <UnigineGame.h>
+#include <UnigineWorld.h>
+
+REGISTER_COMPONENT(CameraManager);
 
 using namespace Unigine;
 
-void TankCamera::init()
+void CameraManager::init()
 {
-    m_camera = checked_ptr_cast<PlayerPersecutor>(node);
-    WindowManager::getMainWindow()->getEventFuncEndRender().connect(this, &TankCamera::render);
+    Vector<NodePtr> dummyCameras;
+    World::getNodesByType(Node::PLAYER_DUMMY, dummyCameras);
+    Vector<NodePtr> persecutorCameras;
+    World::getNodesByType(Node::PLAYER_PERSECUTOR, persecutorCameras);
+    for (const auto &node : dummyCameras)
+    {
+        m_cameras.push_back(checked_ptr_cast<PlayerDummy>(node));
+    }
+    for (const auto &node : persecutorCameras)
+    {
+        m_cameras.push_back(checked_ptr_cast<PlayerPersecutor>(node));
+    }
+    m_currentCamera = m_cameras.begin();
+    WindowManager::getMainWindow()->getEventFuncEndRender().connect(this, &CameraManager::render);
 }
 
-void TankCamera::update()
+void CameraManager::update()
 {
-    float ifps = Game::getIFps();
-    if (Input::isKeyPressed(Input::KEY_I))
-    {
-        m_camera->worldTranslate((Math::Vec3)m_camera->getViewDirection() * speed * ifps);
-        return;
-    }
-    if (Input::isKeyPressed(Input::KEY_K))
-    {
-        m_camera->worldTranslate((Math::Vec3)m_camera->getViewDirection() * (-speed) * ifps);
-        return;
-    }
     if (Input::isKeyDown(Input::KEY_G))
     {
         m_grabFlag = true;
-        return;
     }
-    if (Input::isKeyDown(Input::KEY_O))
+    if (Input::isKeyDown(Input::KEY_N))
     {
-        Game::setPlayer(m_camera);
-        return;
+        m_currentCamera++;
+        if (m_currentCamera == m_cameras.end())
+        {
+            m_currentCamera = m_cameras.begin();
+        }
+        Game::setPlayer(*m_currentCamera);
     }
 }
 
-void TankCamera::render()
+void CameraManager::render()
 {
     // Skip capture unless grab() was called
     if (!m_grabFlag)
