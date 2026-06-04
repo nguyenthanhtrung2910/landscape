@@ -24,5 +24,6 @@
         "*.controls": "xml",
         "*.global": "xml",
         "*.user": "xml",
+        "*.basemat": "c",
     }
 }

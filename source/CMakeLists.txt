@@ -60,6 +60,7 @@ add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Input/KeyboardInput.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/cameramanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/hwvideoencoder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/rtpstream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/cudautils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/cudatexture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/rgba_to_nv12.cu

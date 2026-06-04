@@ -1,12 +1,6 @@
 #ifndef __HW_VIDEO_ENCODER_H__
 #define __HW_VIDEO_ENCODER_H__
 
-#include <cstdint>
-#include <condition_variable>
-#include <mutex>
-#include <queue>
-#include <string>
-#include <thread>
 #include <cuda.h>
 
 #include <UnigineComponentSystem.h>

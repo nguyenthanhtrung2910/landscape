@@ -3,6 +3,7 @@
 #include <UnigineComponentSystem.h>
 
 #include "components/hwvideoencoder/hwvideoencoder.h"
+#include "components/hwvideoencoder/rtpstream.h"
 
 // World logic, it takes effect only when the world is loaded.
 // These methods are called right after corresponding world script's (UnigineScript) methods.
@@ -60,6 +61,9 @@ void AppWorldLogic::releaseHardwareResources()
 	HWVideoEncoder *encoder{Unigine::ComponentSystem::get()->getComponentInWorld<HWVideoEncoder>()};
 	if (encoder)
 		encoder->shutdown();
+	RTPStream *rtpStream{Unigine::ComponentSystem::get()->getComponentInWorld<RTPStream>()};
+	if (rtpStream)
+		rtpStream->shutdown();
 }
 
 void AppWorldLogic::enqueueEvent(const FlightEvent &event)
