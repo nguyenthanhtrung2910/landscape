@@ -9,13 +9,13 @@
 using namespace Unigine;
 using namespace Math;
 
-REGISTER_COMPONENT(ImageGenerator)
+REGISTER_COMPONENT(ImagesGenerator)
 
-void ImageGenerator::init()
+void ImagesGenerator::init()
 {
     m_viewport = Viewport::create();
     m_viewport->setMode(Render::getViewportMode());
-    m_viewport->getEventEndAuxiliaryDecals().connect(this, &ImageGenerator::captureAuxiliary);
+    m_viewport->getEventEndAuxiliaryDecals().connect(this, &ImagesGenerator::captureAuxiliary);
     m_colorTexture = Texture::create();
     m_targetPlayer = checked_ptr_cast<Player>(target_player.get());
     m_framesUntilCapture = capture_frequency.get();
@@ -27,19 +27,19 @@ void ImageGenerator::init()
     groupBox->setPosition(20, 50);
     groupBox->addChild(vbox, Gui::ALIGN_CENTER);
     WidgetButtonPtr buttonCapture{WidgetButton::create("Capture")};
-    buttonCapture->getEventClicked().connect(this, &ImageGenerator::startCapture);
+    buttonCapture->getEventClicked().connect(this, &ImagesGenerator::startCapture);
     WidgetButtonPtr buttonStop{WidgetButton::create("Stop")};
-    buttonStop->getEventClicked().connect(this, &ImageGenerator::stopCapture);
+    buttonStop->getEventClicked().connect(this, &ImagesGenerator::stopCapture);
     vbox->addChild(buttonCapture);
     vbox->addChild(buttonStop);
     gui->addChild(groupBox, Gui::ALIGN_OVERLAP);
 }
 
-void ImageGenerator::shutdown()
+void ImagesGenerator::shutdown()
 {
 }
 
-void ImageGenerator::update()
+void ImagesGenerator::update()
 {
     // Manual capture mode with warmup
     if (m_state == STATE_WARMUP)
@@ -103,14 +103,14 @@ void ImageGenerator::update()
     }
 }
 
-void ImageGenerator::captureAuxiliary()
+void ImagesGenerator::captureAuxiliary()
 {
     if (m_framesUntilCapture <= 1)
     {
         TexturePtr auxiliaryTexture = Renderer::getTextureAuxiliary();
         if (!auxiliaryTexture)
         {
-            Log::warning("ImageGenerator: auxiliary texture is unavailable.\n");
+            Log::warning("ImagesGenerator: auxiliary texture is unavailable.\n");
             return;
         }
         saveTextureAsync(
@@ -120,7 +120,7 @@ void ImageGenerator::captureAuxiliary()
     }
 }
 
-void ImageGenerator::saveTextureAsync(const TexturePtr &texture, const char *pattern, int capture_index)
+void ImagesGenerator::saveTextureAsync(const TexturePtr &texture, const char *pattern, int capture_index)
 {
     if (!texture)
         return;
@@ -134,13 +134,12 @@ void ImageGenerator::saveTextureAsync(const TexturePtr &texture, const char *pat
 					image->flipY();
 
 				String full_name = String::format(pattern, capture_index);
-				image->save(full_name.get());
-				Log::message("ImageGenerator saved \"%s\"\n", full_name.get()); }),
+				image->save(full_name.get()); }),
         nullptr,
         texture);
 }
 
-void ImageGenerator::startCapture()
+void ImagesGenerator::startCapture()
 {
     if (m_state != STATE_IDLE)
         return;
@@ -153,7 +152,7 @@ void ImageGenerator::startCapture()
     m_state = STATE_WARMUP;
 }
 
-void ImageGenerator::stopCapture()
+void ImagesGenerator::stopCapture()
 {
     if (m_state == STATE_IDLE)
         return;
