@@ -1,36 +1,14 @@
-#include <iostream>
-
+#include <UnigineInit.h>
 #include <UnigineEngine.h>
+
+#include <cstdio>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 #include "AppSystemLogic.h"
 #include "AppWorldLogic.h"
-#include "eventsubscribers/helix.h"
-#include "eventsubscribers/udpreceiver.h"
-
-namespace asio = boost::asio;
-
-asio::awaitable<void> engineLoop(
-	AppSystemLogic *systemLogic,
-	AppWorldLogic *worldLogic,
-	Unigine::EnginePtr engine,
-	UDPReceiver *udpReceiver)
-{
-	auto executor = co_await asio::this_coro::executor;
-
-	asio::steady_timer timer(executor);
-	while (true)
-	{
-		if (engine->isQuit())
-		{
-			udpReceiver->stop();
-			co_return;
-		}
-		engine->iterate();
-		// expire immediately
-		timer.expires_after(std::chrono::milliseconds(0));
-		co_await timer.async_wait(asio::use_awaitable);
-	}
-}
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t *argv[])
@@ -38,19 +16,24 @@ int wmain(int argc, wchar_t *argv[])
 int main(int argc, char *argv[])
 #endif
 {
-	asio::io_context io;
-	// engine
-	AppSystemLogic systemLogic;
-	AppWorldLogic worldLogic;
+#ifdef _WIN32
+	// The Windows GUI subsystem does not attach stdout to the launching terminal.
+	if (AttachConsole(ATTACH_PARENT_PROCESS))
+	{
+		FILE *terminal_output = nullptr;
+		freopen_s(&terminal_output, "CONOUT$", "w", stdout);
+	}
+#endif
+
+	// UnigineLogic
+	AppSystemLogic system_logic;
+	AppWorldLogic world_logic;
+
+	// init engine
 	Unigine::EnginePtr engine(argc, argv);
-	engine->addSystemLogic(&systemLogic);
-	engine->addWorldLogic(&worldLogic);
-	// event subscriber
-	UDPReceiver udpReceiver(&io);
-	udpReceiver.start(&worldLogic);
-	// start engine loop via asio co-routine
-	asio::co_spawn(io, engineLoop(&systemLogic, &worldLogic, engine, &udpReceiver), asio::detached);
-	io.run();
-	worldLogic.releaseHardwareResources();
+
+	// enter main loop
+	engine->main(&system_logic, &world_logic);
+
 	return 0;
 }

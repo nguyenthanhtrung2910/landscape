@@ -126,6 +126,7 @@ void ImagesGenerator::saveTextureAsync(const TexturePtr &texture, const char *pa
         return;
 
     Render::asyncTransferTextureToImage(
+        nullptr,
         MakeCallback([capture_index, pattern](ImagePtr image)
                      {
 				if (image->getFormat() != Image::FORMAT_RGB8)
@@ -135,7 +136,6 @@ void ImagesGenerator::saveTextureAsync(const TexturePtr &texture, const char *pa
 
 				String full_name = String::format(pattern, capture_index);
 				image->save(full_name.get()); }),
-        nullptr,
         texture);
 }
 
