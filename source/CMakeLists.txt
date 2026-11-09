@@ -55,7 +55,6 @@ add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppSystemLogic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppWorldLogic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/FirstPersonController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/Drone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PathVisualizer.cpp
