@@ -126,7 +126,7 @@ void ImagesGenerator::saveTextureAsync(
 }
 ```
 
-Для создания маски используется отдельный проход рендеринга UNIGINE — [Auxiliary pass][aux].
+Для создания маски используется отдельный проход рендеринга UNIGINE — [Auxiliary pass](https://developer.unigine.com/en/docs/latest/principles/render/sequence/#auxiliary).
 Проход рендеринга (Render Pass) — это отдельный этап визуализации, на котором 
 GPU считывает данные из входных буферов и при необходимости изменяет их или 
 записывает результаты в новые буферы. Один кадр может состоять из нескольких таких 
