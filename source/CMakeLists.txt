@@ -2,8 +2,14 @@
 ## General.
 ##==============================================================================
 cmake_minimum_required(VERSION 4.0)
+if(NOT CMAKE_HOST_WIN32)
+    message(FATAL_ERROR "landscape is configured for Windows only")
+endif()
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UnigineCMakeVariables.cmake)
 project(landscape LANGUAGES C CXX CUDA)
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(FATAL_ERROR "landscape requires the MSVC C++ toolchain")
+endif()
 
 ##==============================================================================
 ## Global cached default variables.
@@ -20,36 +26,36 @@ set(CMAKE_CUDA_EXTENSIONS FALSE)
 ##==============================================================================
 # Engine.
 set(UNIGINE_DOUBLE 0)
-set(UNIGINE_SDK_PATH ${PROJECT_SOURCE_DIR}/../)
-set(UNIGINE_BIN_DIR ${UNIGINE_SDK_PATH}bin)
-set(UNIGINE_LIB_DIR ${UNIGINE_SDK_PATH}lib)
-set(UNIGINE_INCLUDE_DIR ${UNIGINE_SDK_PATH}include)
+get_filename_component(UNIGINE_SDK_PATH "${PROJECT_SOURCE_DIR}/.." ABSOLUTE)
+set(UNIGINE_BIN_DIR "${UNIGINE_SDK_PATH}/bin")
+set(UNIGINE_LIB_DIR "${UNIGINE_SDK_PATH}/lib")
+set(UNIGINE_INCLUDE_DIR "${UNIGINE_SDK_PATH}/include")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 find_package(Engine REQUIRED MODULE QUIET)
-# JsonCpp
-find_package(jsoncpp REQUIRED)
 # Cuda
 find_package(CUDAToolkit REQUIRED)
-# FFmpeg
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET
-    libavcodec
-    libavformat
-    libavutil
-)
+# FFmpeg's Windows distribution provides MSVC import libraries directly.
+set(FFMPEG_ROOT "" CACHE PATH "Root of the FFmpeg shared build")
+find_path(FFMPEG_INCLUDE_DIR libavcodec/avcodec.h
+    PATHS "${FFMPEG_ROOT}/include" NO_DEFAULT_PATH REQUIRED)
+foreach(ffmpeg_library IN ITEMS avcodec avformat avutil)
+    find_library(FFMPEG_${ffmpeg_library}_LIBRARY NAMES ${ffmpeg_library}
+        PATHS "${FFMPEG_ROOT}/lib" NO_DEFAULT_PATH REQUIRED)
+    add_library(FFmpeg::${ffmpeg_library} UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::${ffmpeg_library} PROPERTIES
+        IMPORTED_LOCATION "${FFMPEG_${ffmpeg_library}_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIR}")
+endforeach()
 
 ##==============================================================================
 ## Target linking.
 ##==============================================================================
 set(target "landscape")
-if(WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE
-        "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:wmainCRTStartup")
-endif()
 add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppSystemLogic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AppWorldLogic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FirstPersonController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/Drone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/Drone/PathVisualizer.cpp
@@ -65,8 +71,8 @@ add_executable(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/cudatexture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/hwvideoencoder/rgba_to_nv12.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/components/imagegenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/helix.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/eventsubscribers/udpreceiver.cpp
 )
 target_include_directories(${target} PRIVATE
     ${CUDAToolkit_INCLUDE_DIRS}
@@ -76,12 +82,11 @@ target_include_directories(${target} PRIVATE
 target_link_libraries(${target} PRIVATE
     Unigine::Engine
     CUDA::cudart
-    JsonCpp::JsonCpp
-    PkgConfig::FFMPEG
+    FFmpeg::avcodec FFmpeg::avformat FFmpeg::avutil
 )
-set_property(TARGET ${target} APPEND PROPERTY
-    BUILD_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/../bin
-)
+target_link_options(${target} PRIVATE
+    "$<$<CONFIG:Release>:$<HOST_LINK:/SUBSYSTEM:WINDOWS>>"
+    "$<$<CONFIG:Release>:$<HOST_LINK:/ENTRY:wmainCRTStartup>>")
 set(binary_name ${target})
 string(APPEND binary_name "_x64")
 set_target_properties(${target} PROPERTIES
@@ -95,49 +100,21 @@ set_target_properties(${target} PROPERTIES
 ## Compiler definitions and options.
 ##==============================================================================
 target_compile_definitions(${target} PRIVATE
-    $<$<BOOL:${UNIX}>:_LINUX>
     $<$<CONFIG:Debug>:DEBUG>
     $<$<NOT:$<CONFIG:Debug>>:NDEBUG>
+    _CRT_SECURE_NO_DEPRECATE
 )
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(UNIGINE_COMPILER_IS_MSVC TRUE)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(UNIGINE_COMPILER_IS_CLANG TRUE)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(UNIGINE_COMPILER_IS_GNU TRUE)
-endif()
-if(UNIGINE_COMPILER_IS_MSVC)
-    target_compile_definitions(${target} PRIVATE
-        _CRT_SECURE_NO_DEPRECATE
-    )
-    include(ProcessorCount)
-    processorcount(proc_count)
-    target_compile_options(${target} PRIVATE
-        /TP # Specifies all source files are C++.
-        /FS # Forces writes to the program database (PDB) file to be serialized through MSPDBSRV.EXE.
-        /fp:fast # Specifies floating-point behavior.
-        /bigobj # Increases the number of addressable sections in an .obj file.
-        /EHsc # Specifies the kind of exception handling used by the compiler.
-        /MP${proc_count} # Build with Multiple Processes.
-    )
-    unset(proc_count)
-    target_link_options(${target} INTERFACE "/FIXED:NO")
-elseif(UNIGINE_COMPILER_IS_GNU OR UNIGINE_COMPILER_IS_CLANG)
-    target_compile_options(${target} PRIVATE
-        -m64
-        -march=athlon64
-        -msse4.2
-        # Optimizations.
-        -ffast-math
-        -fno-strict-aliasing
-        $<$<NOT:$<CONFIG:Debug>>:-fomit-frame-pointer>
-        # Warnings.
-        $<$<CONFIG:Debug>:-Wall>
-        $<$<CONFIG:Debug>:-Wno-unknown-pragmas>
-        $<$<CONFIG:Debug>:-Wno-unused-parameter>
-    )
-endif()
+include(ProcessorCount)
+processorcount(proc_count)
+target_compile_options(${target} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:/FS>
+    $<$<COMPILE_LANGUAGE:CXX>:/fp:fast>
+    $<$<COMPILE_LANGUAGE:CXX>:/bigobj>
+    $<$<COMPILE_LANGUAGE:CXX>:/EHsc>
+    $<$<COMPILE_LANGUAGE:CXX>:/MP${proc_count}>
+)
+unset(proc_count)
 
-add_executable(client
-    client.cpp
-)
+#add_executable(client
+#   client.cpp
+#)

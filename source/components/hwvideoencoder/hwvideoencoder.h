@@ -1,6 +1,8 @@
 #ifndef __HW_VIDEO_ENCODER_H__
 #define __HW_VIDEO_ENCODER_H__
 
+#include <string>
+
 #include <cuda.h>
 
 #include <UnigineComponentSystem.h>

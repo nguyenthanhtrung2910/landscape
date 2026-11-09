@@ -2,46 +2,47 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "landscape-debug",
-            "displayName": "landscape-debug",
-            "description": "Debug configuration preset",
-            "binaryDir": "${sourceDir}/../debug",
+            "name": "windows-base",
+            "hidden": true,
             "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_CUDA_COMPILER": "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3/bin/nvcc.exe",
+                "CUDAToolkit_ROOT": "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3",
+                "FFMPEG_ROOT": "C:/Program Files/WinGet/Packages/Gyan.FFmpeg.Shared_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build-shared",
+                "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/../bin"
             }
         },
         {
+            "name": "landscape-debug",
+            "displayName": "Windows x64 Debug",
+            "inherits": "windows-base",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+        },
+        {
             "name": "landscape-release",
-            "displayName": "landscape-release",
-            "description": "Release configuration preset",
-            "binaryDir": "${sourceDir}/../release",
-            "generator": "Ninja",
-            "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+            "displayName": "Windows x64 Release",
+            "inherits": "windows-base",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
         }
     ],
     "buildPresets": [
         {
             "name": "landscape-debug",
-            "description": "Debug build preset",
-            "displayName": "landscape-debug",
-            "targets": [
-                "landscape", "client"
-            ],
-            "configurePreset": "landscape-debug"
+            "configurePreset": "landscape-debug",
+            "targets": ["landscape"]
         },
         {
             "name": "landscape-release",
-            "description": "Release build preset",
-            "displayName": "landscape-release",
-            "targets": [
-                "landscape", "client"
-            ],
-            "configurePreset": "landscape-release"
+            "configurePreset": "landscape-release",
+            "targets": ["landscape"]
         }
     ]
 }

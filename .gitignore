@@ -11,4 +11,7 @@ release
 debug
 utils
 data
-*.project
+.project
+.vs/
+source/out/
+source/landscape/
